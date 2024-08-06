@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import requests
 
 app = Flask(__name__)
@@ -15,12 +15,19 @@ def index():
 @app.route('/weather', methods=['POST'])
 def weather():
     location = request.form['location']
-    coordinates = get_coordinates(location)
-    if coordinates:
+    if not location:
+        return jsonify({'error': 'Location is required'}), 400
+    try:
+        coordinates = get_coordinates(location)
+        if not coordinates:
+            return jsonify({'error': f"Could not retrieve coordinates for the specified location."}), 404
         weather_data = get_weather_data(coordinates)
-        if weather_data:
-            return render_template('map.html', weather_data=weather_data, google_maps_api_key=GOOGLE_MAPS_API_KEY)
-    return "Error: Could not retrieve weather data for the specified location."
+        if not weather_data:
+            return jsonify({'error': 'Could not retrieve weather data for the specified coordinates.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    return render_template('map.html', weather_data=weather_data, google_maps_api_key=GOOGLE_MAPS_API_KEY)
+
 
 def get_coordinates(location):
     try:
@@ -60,6 +67,7 @@ def get_weather_data(coordinates):
     except requests.RequestException as e:
         print(f"An error occurred: {e}")
         return None
+
 
 if __name__ == '__main__':
     app.run(debug=True)
