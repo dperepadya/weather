@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import weatherapp
 from weatherapp import app
@@ -82,13 +82,20 @@ class TestWeather(unittest.TestCase):
         response = self.app.post('/weather', data={'location': 'Manchester'})
         self.assertEqual(response.status_code, 404)
 
-    @patch('weatherapp.get_weather_data')
-    @patch('weatherapp.get_coordinates')
-    def test_weather_route_exception(self, mock_get_weather_data, mock_get_coordinates):
-        mock_get_coordinates.side_effect = Exception('Cannot get coordinates')
+    @patch('weatherapp.get_coordinates', Mock(side_effect=Exception('Cannot get coordinates')))
+    @patch('weatherapp.get_weather_data', Mock(return_value={'temperature': 25.0}))
+    def test_weather_route_exception_coordinates(self):
         response = self.app.post('/weather', data={'location': 'London'})
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.get_json()['error'], 'Cannot get coordinates')
+
+    @patch('weatherapp.get_coordinates', get_coordinates_mock)
+    @patch('weatherapp.get_weather_data', Mock(side_effect=Exception('Cannot get weather data')))
+    def test_weather_route_exception_weather(self):
+        response = self.app.post('/weather', data={'location': 'London'})
+        # print('Response:', response)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.get_json()['error'], 'Cannot get weather data')
 
 
 if __name__ == '__main__':
