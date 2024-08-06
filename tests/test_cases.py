@@ -83,7 +83,7 @@ class TestWeather(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
 
     @patch('weatherapp.get_coordinates', Mock(side_effect=Exception('Cannot get coordinates')))
-    @patch('weatherapp.get_weather_data', Mock(return_value={'temperature': 25.0}))
+    @patch('weatherapp.get_weather_data', get_weather_data_mock)
     def test_weather_route_exception_coordinates(self):
         response = self.app.post('/weather', data={'location': 'London'})
         self.assertEqual(response.status_code, 500)

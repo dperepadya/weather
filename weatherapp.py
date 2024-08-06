@@ -21,7 +21,7 @@ def weather():
         coordinates = get_coordinates(location)
         if not coordinates:
             return jsonify({'error': f"Could not retrieve coordinates for the specified location."}), 404
-        # print('coordinates: ', coordinates)
+        print('coordinates: ', coordinates)
         weather_data = get_weather_data(coordinates)
         if not weather_data:
             return jsonify({'error': 'Could not retrieve weather data for the specified coordinates.'}), 404
