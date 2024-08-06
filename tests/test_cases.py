@@ -36,9 +36,8 @@ class TestWeather(unittest.TestCase):
         result = weatherapp.get_coordinates("Manchester")
         self.assertIsNone(result)
 
-    @patch('weatherapp.get_coordinates')
-    def test_get_coordinates_exception(self, mock_get_coordinates):
-        mock_get_coordinates.side_effect = Exception('Cannot get coordinates')
+    @patch('weatherapp.get_coordinates', Mock(side_effect=Exception('Cannot get coordinates')))
+    def test_get_coordinates_exception(self):
         try:
             result = weatherapp.get_coordinates("London")
         except Exception as e:
@@ -59,9 +58,8 @@ class TestWeather(unittest.TestCase):
         }
         self.assertEqual(result, expected_data)
 
-    @patch('weatherapp.get_weather_data')
-    def test_get_weather_data_exception(self, mock_get_weather_data):
-        mock_get_weather_data.side_effect = Exception('Cannot get coordinates')
+    @patch('weatherapp.get_weather_data', Mock(side_effect=Exception('Cannot get weather data')))
+    def test_get_weather_data_exception(self):
         try:
             coordinates = {'lat': 10.1, 'lon': -10.1}
             result = weatherapp.get_weather_data(coordinates)
